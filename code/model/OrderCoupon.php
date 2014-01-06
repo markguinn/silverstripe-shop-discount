@@ -95,10 +95,10 @@ class OrderCoupon extends DataObject {
 					new TextField("Title"),
 					new TextField("Code"),
 					new CheckboxField("Active","Active (allow this coupon to be used)"),
-					new FieldGroup("This discount applies to:",
-						new CheckboxField("ForItems","Item values"),
-						new CheckboxField("ForShipping","Shipping cost")
-					),
+//					new FieldGroup("This discount applies to:",
+//						new CheckboxField("ForItems","Item values"),
+//						new CheckboxField("ForShipping","Shipping cost")
+//					),
 					new HeaderField("Criteria","Order and Item Criteria",4),
 					new LabelField("CriteriaDescription", "Configure the requirements an order must meet for this coupon to be used with it:"),
 					new FieldGroup("Valid date range:",
