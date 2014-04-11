@@ -19,6 +19,7 @@ class CouponsModelAdmin extends ModelAdmin {
 	
 	public static $url_segment = 'coupons';
 	public static $menu_title = 'Coupons';
+	public static $menu_icon = 'shop_discount/images/icon-coupons.png';
 	
 	public static $model_importers = array(
 		'Product' => 'CouponBulkLoader',
