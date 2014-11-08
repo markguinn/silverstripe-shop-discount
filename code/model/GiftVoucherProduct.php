@@ -11,26 +11,32 @@ class GiftVoucherProduct extends Product{
 	
 	static $order_item = "GiftVoucher_OrderItem";
 	
-	public static $singular_name = "Gift Voucher";
+	public static $singular_name = "Gift Card";
 	function i18n_singular_name() { return _t("GiftVoucherProduct.SINGULAR", $this->stat('singular_name')); }
-	public static $plural_name = "Gift Vouchers";
+	public static $plural_name = "Gift Cards";
 	function i18n_plural_name() { return _t("GiftVoucherProduct.PLURAL", $this->stat('plural_name')); }
 	
 	function getCMSFields(){
 		$fields = parent::getCMSFields();
-		$fields->addFieldToTab("Root.Content.Pricing", 
+		$fields->addFieldToTab("Root.Pricing", 
 			new OptionsetField("VariableAmount","Price",array(
 				0 => "Fixed",
 				1 => "Allow customer to choose"	
 			)),
 			"BasePrice"
 		);
-		$fields->addFieldsToTab("Root.Content.Pricing", array(
+		$fields->addFieldsToTab("Root.Pricing", array(
 			$minimumamount = new TextField("MinimumAmount","Minimum Amount") //text field, because of CMS js validation issue
 		));
 		$fields->removeByName("CostPrice");
 		$fields->removeByName("Variations");
 		$fields->removeByName("Model");
+
+
+		$fields->removeByName("Shipping");
+		$fields->removeByName("Downloads");
+		
+		
 		return $fields;
 	}
 	
@@ -44,14 +50,53 @@ class GiftVoucherProduct extends Product{
 }
 
 class GiftVoucherProduct_Controller extends Product_Controller{
+
+	private static $allowed_actions = array(
+		'Form',
+		'AddProductForm'
+	);
+	
 	
 	function Form(){
+		
+		Requirements::javascript('shop_discount/javascript/GiftVoucherProduct.js');
+		
 		$form = parent::Form();
 		if($this->VariableAmount){
 			$form->setSaveableFields(array(
 				"UnitPrice"
 			));
-			$form->Fields()->push($giftamount = new CurrencyField("UnitPrice","Amount",$this->BasePrice)); //TODO: set minimum amount
+			
+			$form->Fields()->push(
+				$giftDropdown = new DropdownField(
+					"GiftCardAmountDropdown",
+					"Amount",
+					array(
+						//'$0.00' => 'Please select amount',
+						'10.00' => '$10',
+						'25.00' => '$25',
+						'50.00' => '$50',
+						'75.00' => '$75',
+						'100.00' => '$100',
+						'150.00' => '$150',
+						'200.00' => '$200',
+						'' => 'Enter Amount'
+						
+					),
+					$this->BasePrice
+				)
+			);
+			$giftDropdown->setForm($form);
+			//Debug::dump($this->BasePrice);
+			//$giftDropdown->setEmptyString($this->BasePrice);
+			
+			$form->Fields()->push(
+				$giftamount = new CurrencyField(
+					"UnitPrice",
+					"Enter Amount",
+					$this->BasePrice
+				)
+			); //TODO: set minimum amount
 			$giftamount->setForm($form);
 		}
 		$form->setValidator($validator = new GiftVoucherFormValidator(array(
