@@ -59,7 +59,9 @@ class OrderCoupon extends DataObject {
 		"DiscountNice",
 		"StartDate",
 		"EndDate",
-		"UseCount"
+		"UseCount",
+		"OrderReference"
+		
 	);
 
 	static $singular_name = "Discount";
@@ -75,6 +77,26 @@ class OrderCoupon extends DataObject {
 			->filter('Code:nocase', $code)
 			->first();
 	}
+
+	/**
+	 * Getter for related order
+	 * This only applies to Gift cards
+	 */
+	public function getOrder() {
+		if ($v = $this->GiftVoucher()) {
+			return $v->Order();
+		}
+	}
+	/**
+	 * Getter for related order reference
+	 * This only applies to Gift cards
+	 */
+	public function getOrderReference() {
+		if ($o = $this->getOrder()) {
+			return $o->Reference;
+		}
+	}
+	
 
 	/**
 	 * Generates a unique code.
