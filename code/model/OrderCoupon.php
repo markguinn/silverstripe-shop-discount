@@ -58,7 +58,8 @@ class OrderCoupon extends DataObject {
 		"Title",
 		"DiscountNice",
 		"StartDate",
-		"EndDate"
+		"EndDate",
+		"UseCount"
 	);
 
 	static $singular_name = "Discount";
@@ -391,7 +392,17 @@ class OrderCoupon extends DataObject {
 //		$query->select("OrderCouponModifier.ID");
 //		return $query->unlimitedRowCount("\"OrderCouponModifier\".\"ID\"");
 
-		$filter = "\"Order\".\"Paid\" IS NOT NULL";
+		//$filter = "\"Order\".\"Paid\" IS NOT NULL";
+		
+		//Instead of checking on Order.Paid we're here checking on Order.Reference
+		//As an order ordered on a gift card does not necessary need to have a paid date
+		$filter = "\"Order\".\"Reference\" IS NOT NULL";
+		
+		//Additionally we're making sure that we're only counting order items
+		//That belong to this coupon
+		$filter .= " AND \"OrderCouponModifier\".\"CouponID\" =" . $this->ID;
+		
+		
 		if($order){
 			$filter .= " AND \"OrderAttribute\".\"OrderID\" != ".$order->ID;
 		}
