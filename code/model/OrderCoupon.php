@@ -67,22 +67,29 @@ class OrderCoupon extends DataObject {
 	function i18n_plural_name() { return _t("OrderCoupon.COUPONS", "Coupons");}
 
 	static $default_sort = "EndDate DESC, StartDate DESC";
-	static $code_length = 10;
+	static $generated_code_length = 10;
 
-	static function get_by_code($code){
-		return DataObject::get_one('OrderCoupon',"\"Code\" = UPPER('$code')");
+	public static function get_by_code($code) {
+		return self::get()
+			->filter('Code:nocase', $code)
+			->first();
 	}
-	
+
 	/**
-	* Generates a unique code.
-	* @return string - new code
-	*/
-	static function generateCode($length = null){
-		$length = ($length) ? $length : self::$code_length;
+	 * Generates a unique code.
+	 * @todo depending on the length, it may be possible that all the possible
+	 *       codes have been generated.
+	 * @return string the new code
+	 */
+	public static function generate_code($length = null, $prefix = "") {
+		$length = ($length) ? $length : self::config()->generated_code_length;
 		$code = null;
-		do{
-			$code = strtoupper(substr(md5(microtime()),0,$length));
-		}while(DataObject::get('OrderCoupon',"\"Code\" = '$code'"));
+		$generator = Injector::inst()->create('RandomGenerator');
+		do {
+			$code = $prefix.strtoupper(substr($generator->randomToken(), 0, $length));
+		} while (
+			self::get()->filter("Code:nocase", $code)->exists()
+		);
 		return $code;
 	}
 	
@@ -167,8 +174,9 @@ class OrderCoupon extends DataObject {
 	 * Autogenerate the code if needed
 	 */
 	protected function onBeforeWrite() {
-		// If they didn't enter a code, generate a random one
-		if (empty($this->Code)) $this->Code = self::generateCode();
+		if (empty($this->Code)){
+			$this->Code = self::generate_code();
+		}
 		parent::onBeforeWrite();
 	}
 
