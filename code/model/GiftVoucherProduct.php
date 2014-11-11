@@ -157,8 +157,10 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 	/**
 	 * Create vouchers on order payment success event
 	 */
-	function onPayment(){
-		parent::onPayment();
+	function onPlacement() {
+	//function onPayment(){
+		//parent::onPayment();
+		parent::onPlacement();
 		if($this->Coupons()->Count() < $this->Quantity){
 			$remaining = $this->Quantity - $this->Coupons()->Count();
 			for($i = 0; $i < $remaining; $i++){
