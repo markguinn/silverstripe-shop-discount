@@ -184,7 +184,8 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 			"Type" => "Amount",
 			"Amount" => $this->UnitPrice,
 			"UseLimit" => 1,
-			"MinOrderValue" => $this->UnitPrice //safeguard that means coupons must be used entirely
+			//we don't want any min value, as any unused amount will be added to the user's balance
+			//"MinOrderValue" => $this->UnitPrice //safeguard that means coupons must be used entirely
 		));
 		$this->extend("updateCreateCupon",$coupon);
 		$coupon->write();

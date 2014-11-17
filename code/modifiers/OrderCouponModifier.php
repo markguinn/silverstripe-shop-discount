@@ -52,6 +52,30 @@ class OrderCouponModifier extends OrderModifier {
 	 * @see OrderModifier::value()
 	 */
 	function value($incoming){
+		
+		
+		
+		$coupon = $this->Coupon();
+		if ($coupon && $coupon->GiftVoucher()) {
+			$orderAmount = $this->Amount;
+			$couponAmount = $coupon->Amount;
+			//Debug::dump($orderAmount);
+			//Debug::dump($couponAmount);
+			//
+			
+			if ($couponAmount > $orderAmount) {
+				$m = Member::currentUser();
+				
+				$balance = $m->AccountBalance->getAmount() + ($couponAmount - $orderAmount);
+				$m->AccountBalance = DBField::create_field('Money', array(
+					"Currency" => 'USD',
+					"Amount" => $balance
+				));
+				$m->AccountBalanceChangeDescription = 'Updated balance with Giftvoucher (TODO this should only happen on checkout - AND ONLY ONCE)';
+				$m->write();
+			}
+		}
+		
 		if($coupon = $this->Coupon()){
 			$this->Amount = $coupon->orderDiscount($this->Order());
 		}
