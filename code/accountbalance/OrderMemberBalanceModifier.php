@@ -45,7 +45,7 @@ class OrderMemberBalanceModifier extends OrderModifier {
 		$order = $this->Order();
 		$subtotal = $order->SubTotal();
 		
-		$discount = $balance - $subtotal;
+		$discount = $balance;
 		
 		//ensure discount never goes above Amount
 		if($discount > $subtotal){
