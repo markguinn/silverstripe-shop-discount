@@ -39,6 +39,14 @@ class MemberBalanceExtension extends DataExtension {
 	 * @param int $amount
 	 */
 	public function setAccountBalanceCustom($amount, $currency = 'USD') {
+		
+		//doing below this way instead (still don't understand why it didn't work, as it works on the history part)
+		$this->owner->AccountBalanceAmount = $amount;
+		$this->owner->AccountBalanceCurrency = $currency;
+		
+		//Debug::dump($amount);
+		return;
+		
 		$this->owner->AccountBalance = DBField::create_field('Money', array(
 			"Currency" => $currency,
 			"Amount" => $amount
@@ -134,7 +142,7 @@ class MemberBalanceExtension extends DataExtension {
 	public function addCouponRemainderToBalance($amount, $coupon, $order = null) {
 		$o = $this->owner;
 
-		$description = "Added remainder from gift card {$coupon->Code}";
+		$description = "Added remainder of {$amount} from gift card {$coupon->Code}";
 		if ($order) {
 			$description .= " on order #{$order->Reference}";
 		}
