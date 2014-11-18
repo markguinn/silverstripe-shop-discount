@@ -41,12 +41,19 @@ class OrderMemberBalanceModifier extends OrderModifier {
 	 */
 	function value($incoming){
 
-		$m = Member::currentUser();
-		$balance = $m->getAccountBalanceAmount();
+		$balance = $this->accountBalanceAmount();
+		$order = $this->Order();
+		$subtotal = $order->SubTotal();
 		
-		//$order = $this->Order();
+		$discount = $balance - $subtotal;
+		
+		//ensure discount never goes above Amount
+		if($discount > $subtotal){
+			$discount = $subtotal;
+		}
+		
+		$this->Amount = $discount;
 
-		$this->Amount = $balance;
 		return $this->Amount;
 
 	}
@@ -55,7 +62,8 @@ class OrderMemberBalanceModifier extends OrderModifier {
 	 * @see OrderModifier::TableTitle()
 	 */
 	public function TableTitle(){
-		return 'Account Balance';
+		$balance = "$" . $this->accountBalanceAmount();
+		return "From account balance (total {$balance})";
 	}
 	
 	
@@ -64,6 +72,14 @@ class OrderMemberBalanceModifier extends OrderModifier {
 	*/
 	public function IsDeductable() {
 		return true;
+	}
+	
+	
+	private function accountBalanceAmount() {
+		$m = Member::currentUser();
+		$balance = $m->getAccountBalanceAmount();
+	
+		return $balance;
 	}
 	
 	///**
