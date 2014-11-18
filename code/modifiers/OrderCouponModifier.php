@@ -88,7 +88,13 @@ class OrderCouponModifier extends OrderModifier {
 	 */
 	public function TableTitle(){
 		if($coupon = $this->Coupon()) {
-			return sprintf(_t("OrderCouponModifier.COUPON", "Coupon: %s"),$coupon->Title);
+			$title = sprintf(_t("OrderCouponModifier.COUPON", "Coupon: %s"),$coupon->Title);
+
+			if ($coupon->GiftVoucher()) {
+				$title .= " <br /><em>Total: {$coupon->Amount}</em> <br/> <em>Remainder will be added to your balance on checkout.</em>";
+			}
+			
+			return $title;
 		}
 		return _t("OrderCouponModifier.NOCOUPONENTERED", "No Coupon Entered").$code;
 	}

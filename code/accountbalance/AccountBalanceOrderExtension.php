@@ -23,6 +23,25 @@ class AccountBalanceOrderExtension extends DataExtension {
 					$m = $this->owner->Member();
 					$m->subtractBalance($amount, $this->owner);
 				}
+
+				//Adding coupon remains to balance if a coupon modifier is present
+				if ($className == 'OrderCouponModifier') {
+					$coupon = $modifier->Coupon();
+					
+					//This should only happen if this is a gift voucher
+					if ($coupon && $coupon->GiftVoucher()) {
+						$orderAmount = $modifier->Amount;
+						$couponAmount = $coupon->Amount;
+						
+						if ($couponAmount > $orderAmount) {
+							$m = $this->owner->Member();
+							$amount = $couponAmount - $orderAmount;
+							$m->addCouponRemainderToBalance($amount, $coupon, $this->owner);
+						}
+					}
+				}
+				
+				
 			}
 		}
 		
