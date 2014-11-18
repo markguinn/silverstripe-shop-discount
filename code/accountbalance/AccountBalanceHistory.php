@@ -12,9 +12,12 @@ class AccountBalanceHistory extends DataObject {
 	);
 	
 	private static $has_one = array(
-		'Member' => 'Member'
+		'Member' => 'Member',
+		//These are only relevant when the balance
+		//has been changed through a coupon/order
+		'Coupon' => 'OrderCoupon',
+		'Order' => 'Order'
 	);
-	
 	
 	private static $default_sort = 'Created DESC';
 
@@ -25,6 +28,26 @@ class AccountBalanceHistory extends DataObject {
 	);
 
 	/**
+	 * Getter for the balance amount
+	 * @return int
+	 */
+	public function getBalanceAmount() {
+		return $this->Balance->getAmount();
+	}
+
+	/**
+	 * Setter for the balance amount
+	 * @param int $amount
+	 */
+	public function setBalance($amount, $currency = 'USD') {
+		$this->Balance = DBField::create_field('Money', array(
+			"Currency" => $currency,
+			"Amount" => $amount
+		));
+	}
+	
+	
+	/**
 	 * Creating the balance history
 	 * This should only be called from {@see MemberBalanceExtension::onAfterWrite}
 	 * 
@@ -32,11 +55,10 @@ class AccountBalanceHistory extends DataObject {
 	public static function create_history($member, $amount, $description = null, $currency = 'USD') {
 		$h = new AccountBalanceHistory();
 		$h->MemberID = $member->ID;
-		$h->Balance = DBField::create_field('Money', array(
-			"Currency" => $currency,
-			"Amount" => $amount
-		));
+		$h->setBalance($amount, $currency);
 		$h->Description = $description;
 		$h->write();
+		
+		return $h;
 	}
 }
