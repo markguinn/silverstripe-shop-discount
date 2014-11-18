@@ -25,7 +25,7 @@ a price.
 	* The customer can choose between preselected options in the dropdown,
 	or enter an own amount
 * After successful payment, the customer receives an invoice, and one or
-many gift card vouchers.
+many gift card vouchers
 	* Gift card vouchers are also visible under "Account > Past Orders"
 * These vouchers can now be entered when purchasing items in the store
 
@@ -33,33 +33,51 @@ many gift card vouchers.
 ### Using a Gift Card
 
 * The customer fills up the shopping cart with one or several items
-	* The cart sub total must be at least the same as the gift cart or more **(we want to change this)**
-* Once done shopping, the customer enters the coupon code in the coupon code field, and
+* The customer enters the coupon code in the coupon code field, and
 the amount of the gift card amount will be deducted from the order total
+	* The customer is notified that if the order is less than the gift card amount,
+	the remainder will be added to his/her balance on checkout
 * The customer can now check out like usual
-* Once the order has been processed, the gift card cannot be reused
+* Once the order has been processed, the gift card cannot be reused, but the 
+remainder is added to the customer's account
+
+
+## Installation
+
+Add these to your `yml` config:
+
+	Member:
+	  extensions:
+	   - MemberBalanceExtension
+	Order:
+	  extensions:
+		- AccountBalanceOrderExtension
+
+
+Add this to your `_config.php`:
+
+	Order::set_modifiers(array(
+		"OrderCouponModifier",
+		"OrderMemberBalanceModifier",
+	));
 
 
 
 
-## TODOS
+## Todos/Issues/Edge cases
 
-* MAJOR: it should be possible to use the credit on a gift card for more than one purchase
-	* see below
 * Option to enter a message for the recipient
+	* Either print or email the voucher to someone else
 * Make some kind of gift card design?
 * It seems emails are not being sent out when the order total is 0
+* Adding a gift card/coupon while having a positive balance, gives errors
+in the calculation
+
+## Possible improvements
+
+* consider naming - member balance / account balance / ?
 
 
-
-## Ideas for reusing gift cards for more than one purchase
-
-* Create a "redeem gift card form"
-	* In order to redeem a gift card the customer needs to be logged in
-	* We could still give the customer the option to just use the gift card in it's entirety
-	as a coupon
-	* The customer would now have a balance tied to his/her account, which will be
-	used each time he/she makes a purchase - until the balance is used up
 
 
 
