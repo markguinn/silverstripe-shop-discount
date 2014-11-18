@@ -82,16 +82,5 @@ class OrderMemberBalanceModifier extends OrderModifier {
 	
 		return $balance;
 	}
-	
-	///**
-	// * Gets the order subtotal
-	//* @return float
-	//*/
-	//protected function LiveSubTotalAmount() {
-	//	if($this->OrderCoupon()) {
-	//		$order = $this->Order();
-	//		return $order->SubTotal();
-	//	}
-	//	return 0;
-	//}
+
 }

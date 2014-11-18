@@ -53,30 +53,6 @@ class OrderCouponModifier extends OrderModifier {
 	 */
 	function value($incoming){
 		
-		
-		//This bit should be moved to order fulfilment, but
-		//is kept here for development/debugging for now
-		$debug = false;
-		//$debug = true;
-		
-		$coupon = $this->Coupon();
-		if ($coupon && $coupon->GiftVoucher() && $debug) {
-			$orderAmount = $this->Amount;
-			$couponAmount = $coupon->Amount;
-			//Debug::dump($orderAmount);
-			//Debug::dump($couponAmount);
-			//
-			
-			if ($couponAmount > $orderAmount) {
-				$m = Member::currentUser();
-				$amount = $couponAmount - $orderAmount;
-				$m->addCouponRemainderToBalance($amount, $coupon);
-			}
-		}
-		
-		
-		
-		
 		if($coupon = $this->Coupon()){
 			$this->Amount = $coupon->orderDiscount($this->Order());
 		}
