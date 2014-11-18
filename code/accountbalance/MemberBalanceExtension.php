@@ -38,7 +38,7 @@ class MemberBalanceExtension extends DataExtension {
 	 * Setter for the balance amount
 	 * @param int $amount
 	 */
-	public function setAccountBalance($amount, $currency = 'USD') {
+	public function setAccountBalanceCustom($amount, $currency = 'USD') {
 		$this->owner->AccountBalance = DBField::create_field('Money', array(
 			"Currency" => $currency,
 			"Amount" => $amount
@@ -139,7 +139,7 @@ class MemberBalanceExtension extends DataExtension {
 			$description .= " on order #{$order->Reference}";
 		}
 		
-		$this->modifyBalance($amount, $description, $order);
+		$this->modifyBalance($amount, $description, $order, $coupon);
 	}
 
 	/**
@@ -182,7 +182,7 @@ class MemberBalanceExtension extends DataExtension {
 		$currentBalance = $o->getAccountBalanceAmount();
 		$newBalance = $currentBalance + $amount;
 
-		$o->setAccountBalance($newBalance);
+		$o->setAccountBalanceCustom($newBalance);
 		$o->write();
 
 		//Creating history

@@ -36,10 +36,10 @@ class AccountBalanceHistory extends DataObject {
 	}
 
 	/**
-	 * Setter for the balance amount
+	 * Custom setter for the balance amount
 	 * @param int $amount
 	 */
-	public function setBalance($amount, $currency = 'USD') {
+	public function setBalanceCustom($amount, $currency = 'USD') {
 		$this->Balance = DBField::create_field('Money', array(
 			"Currency" => $currency,
 			"Amount" => $amount
@@ -55,7 +55,7 @@ class AccountBalanceHistory extends DataObject {
 	public static function create_history($member, $amount, $description = null, $currency = 'USD') {
 		$h = new AccountBalanceHistory();
 		$h->MemberID = $member->ID;
-		$h->setBalance($amount, $currency);
+		$h->setBalanceCustom($amount, $currency);
 		$h->Description = $description;
 		$h->write();
 		
