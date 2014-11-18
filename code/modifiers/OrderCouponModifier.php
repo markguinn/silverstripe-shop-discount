@@ -90,7 +90,8 @@ class OrderCouponModifier extends OrderModifier {
 		if($coupon = $this->Coupon()) {
 			$title = sprintf(_t("OrderCouponModifier.COUPON", "Coupon: %s"),$coupon->Title);
 
-			if ($coupon->GiftVoucher()) {
+			//Additional notification on that remainder will be added to account on checkout
+			if ($coupon->GiftVoucher() && ($this->Order()->Status == 'Cart')) {
 				$title .= " <br /><em>Total: {$coupon->Amount}</em> <br/> <em>Remainder will be added to your balance on checkout.</em>";
 			}
 			
