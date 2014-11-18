@@ -54,9 +54,13 @@ class OrderCouponModifier extends OrderModifier {
 	function value($incoming){
 		
 		
+		//This bit should be moved to order fulfilment, but
+		//is kept here for development/debugging for now
+		$debug = false;
+		//$debug = true;
 		
 		$coupon = $this->Coupon();
-		if ($coupon && $coupon->GiftVoucher()) {
+		if ($coupon && $coupon->GiftVoucher() && $debug) {
 			$orderAmount = $this->Amount;
 			$couponAmount = $coupon->Amount;
 			//Debug::dump($orderAmount);
@@ -69,6 +73,9 @@ class OrderCouponModifier extends OrderModifier {
 				$m->addCouponRemainderToBalance($amount, $coupon);
 			}
 		}
+		
+		
+		
 		
 		if($coupon = $this->Coupon()){
 			$this->Amount = $coupon->orderDiscount($this->Order());

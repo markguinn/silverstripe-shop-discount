@@ -25,6 +25,7 @@ class AccountBalanceHistory extends DataObject {
 		'Created' => 'Created',
 		'Balance' => 'Balance',
 		'Description' => 'Description',
+		'Order.Reference' => 'Order'
 	);
 
 	/**
