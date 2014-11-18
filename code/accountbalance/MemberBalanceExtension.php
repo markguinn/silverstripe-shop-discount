@@ -10,7 +10,6 @@ class MemberBalanceExtension extends DataExtension {
 
 	private static $db = array(
 		'AccountBalance' => 'Money', //this should always be 0 or positive - we don't work with credit (for the moment at least)
-		'AccountBalanceChangeDescription' => 'Text' //this is hidden, and used for the history
 	);
 	
 	private static $has_many = array(
@@ -55,58 +54,45 @@ class MemberBalanceExtension extends DataExtension {
 	
 
 	public function updateCMSFields(FieldList $fields) {
-
-		//$f = TextField::create('AccountBalance');
 		
 		//Balance editing
 		$bf = new MoneyField('AccountBalance');
 		$bf->setAllowedCurrencies(array('USD'));
-		
-		
-		$cm = Member::currentUser();
-		$bdf = new HiddenField(
-			'AccountBalanceChangeDescription'
-		);
-		$bdf->setValue("Changed by {$cm->getName()} via the CMS");
+
 		
 		//Balance history
 		$fields->removeByName('AccountBalanceHistories');
 		$hf = new GridField('AccountBalanceHistories', 'History', $this->owner->AccountBalanceHistories());
 		
 		
-		
 		$fields->addFieldsToTab('Root.Balance', array(
 				$bf,
-				$bdf,
 				HeaderField::create('BalanceHistory', 'Balance History'),
 				$hf
 			)
 		);
- 
 	}
 
 
 	/**
 	 * Writing the balance history on after write
+	 * This is only meant to happen when the balance is changed via the cms
+	 * For any other changes, set self::$enable_on_after_write to false
 	 */
 	public function onAfterWrite() {
 		parent::onAfterWrite();
 		
-		//Will only be executed by default
-		//As this is only meant to happen when a balance is edited via the CMS
+		//Don't do anything if $enable_on_after_write is false
 		if (!self::$enable_on_after_write) return;
 		
+		$cm = Member::currentUser();
 		
-		$balanceAmount = $this->owner->AccountBalance
-			->getAmount();
-		$balanceChangeDesc = $this->owner->AccountBalanceChangeDescription;
-		
-		
-		$lastHistoryItem = $this->owner->AccountBalanceHistories()
-			->first();
-
+		$balanceAmount = $this->owner->AccountBalance->getAmount();
+		$balanceChangeDesc = "Balance changed by {$cm->getName()}";
+		$lastHistoryItem = $this->owner->AccountBalanceHistories()->first();
 		
 		if ($lastHistoryItem && $lastHistoryItem->exists()) {
+			//If a balance history exists:
 			
 			//Create balance history if the balance has changed
 			if ($lastHistoryItem->Balance->getAmount() != $balanceAmount) {
@@ -117,9 +103,10 @@ class MemberBalanceExtension extends DataExtension {
 				);
 			}
 			
-			
 		} else {
-			//create the first balance history, if current balance is not 0
+			//If no balance history exists:
+			
+			//Create the first balance history, if current balance is not 0
 			if (!$balanceAmount == 0) {
 				AccountBalanceHistory::create_history(
 					$this->owner,
@@ -140,7 +127,6 @@ class MemberBalanceExtension extends DataExtension {
 	 * @param null        $order
 	 */
 	public function addCouponRemainderToBalance($amount, $coupon, $order = null) {
-		$o = $this->owner;
 
 		$description = "Added remainder of {$amount} from gift card {$coupon->Code}";
 		if ($order) {
@@ -158,7 +144,6 @@ class MemberBalanceExtension extends DataExtension {
 	 * @param null $order
 	 */
 	public function subtractBalance($amount, $order = null) {
-		$o = $this->owner;
 
 		//make amount negative
 		$negativeAmount = $amount * -1;

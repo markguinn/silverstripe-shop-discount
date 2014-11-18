@@ -50,7 +50,6 @@ class AccountBalanceHistory extends DataObject {
 	
 	/**
 	 * Creating the balance history
-	 * This should only be called from {@see MemberBalanceExtension::onAfterWrite}
 	 * 
 	 */
 	public static function create_history($member, $amount, $description = null, $currency = 'USD') {
