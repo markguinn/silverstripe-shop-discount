@@ -17,7 +17,7 @@ class OrderMemberBalanceModifier extends OrderModifier {
 	 * @see OrderModifier::required()
 	 */
 	function required(){
-		return true;
+		return $this->valid();
 	}
 	
 	/**
@@ -30,6 +30,7 @@ class OrderMemberBalanceModifier extends OrderModifier {
 		if ($m && $amount = $m->getAccountBalanceAmount()) {
 			return true;
 		}
+		return false;
 	}
 	
 	public function canRemove() {
