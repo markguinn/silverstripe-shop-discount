@@ -45,12 +45,30 @@ class OrderMemberBalanceModifier extends OrderModifier {
 		$balance = $this->accountBalanceAmount();
 		$order = $this->Order();
 		$subtotal = $order->SubTotal();
+
+
+		//Taking account for other modifiers
+		//We don't want to subtract anything that has
+		//already been subtracted
+		//
+		//For now we only check for OrderCouponModifier, but this could
+		//be made more generic
 		
-		$discount = $balance;
+		$alreadyDiscounted = 0;
+		$modifiers = $order->Modifiers();
+		foreach($modifiers as $modifier) {
+			$className = $modifier->ClassName;
+			if ($className == 'OrderCouponModifier') {
+				$modifierAmount = $modifier->Amount;
+				$alreadyDiscounted = $alreadyDiscounted + $modifierAmount;
+			}
+		}
+
+		$availableDiscount = $balance + $alreadyDiscounted;
 		
 		//ensure discount never goes above Amount
-		if($discount > $subtotal){
-			$discount = $subtotal;
+		if($availableDiscount > $subtotal){
+			$discount = $subtotal - $alreadyDiscounted;
 		}
 		
 		$this->Amount = $discount;
