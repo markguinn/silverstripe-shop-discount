@@ -64,9 +64,10 @@ class OrderMemberBalanceModifier extends OrderModifier {
 			}
 		}
 
-		$availableDiscount = $balance + $alreadyDiscounted;
+		$discount = $balance;
 		
 		//ensure discount never goes above Amount
+		$availableDiscount = $balance + $alreadyDiscounted;
 		if($availableDiscount > $subtotal){
 			$discount = $subtotal - $alreadyDiscounted;
 		}
