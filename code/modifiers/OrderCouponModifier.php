@@ -54,7 +54,7 @@ class OrderCouponModifier extends OrderModifier {
 	function value($incoming){
 		
 		if($coupon = $this->Coupon()){
-			$this->Amount = $coupon->orderDiscount($this->Order());
+			$this->Amount = $coupon->orderDiscount($this->Order(), $incoming);
 		}
 		return $this->Amount;
 	}
@@ -95,7 +95,7 @@ class OrderCouponModifier extends OrderModifier {
 	}
 	
 	function getModifierForm($controller) {
-		return self::get_form();
+		return self::get_form($controller);
 	}
 	static function get_form($controller) {
 		return new CouponForm($controller,"CouponForm");

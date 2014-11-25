@@ -86,9 +86,10 @@ class MemberBalanceExtension extends DataExtension {
 		if (!self::$enable_on_after_write) return;
 		
 		$cm = Member::currentUser();
+		$cmName = $cm ? $cm->getName() : $this->owner->getName();
 		
 		$balanceAmount = $this->owner->AccountBalance->getAmount();
-		$balanceChangeDesc = "Balance changed by {$cm->getName()}";
+		$balanceChangeDesc = "Balance changed by {$cmName}";
 		$lastHistoryItem = $this->owner->AccountBalanceHistories()->first();
 		
 		if ($lastHistoryItem && $lastHistoryItem->exists()) {
