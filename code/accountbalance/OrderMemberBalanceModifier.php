@@ -36,42 +36,23 @@ class OrderMemberBalanceModifier extends OrderModifier {
 	public function canRemove() {
 		return false;
 	}
-	
+
 	/**
 	 * @see OrderModifier::value()
 	 */
 	function value($incoming){
 
 		$balance = $this->accountBalanceAmount();
-		$order = $this->Order();
-		$subtotal = $order->SubTotal();
-
-
-		//Taking account for other modifiers
-		//We don't want to subtract anything that has
-		//already been subtracted
-		//
-		//For now we only check for OrderCouponModifier, but this could
-		//be made more generic
-		
-		$alreadyDiscounted = 0;
-		$modifiers = $order->Modifiers();
-		foreach($modifiers as $modifier) {
-			$className = $modifier->ClassName;
-			if ($className == 'OrderCouponModifier') {
-				$modifierAmount = $modifier->Amount;
-				$alreadyDiscounted = $alreadyDiscounted + $modifierAmount;
-			}
-		}
+		//		$order = $this->Order();
+		$subtotal = $incoming; //$order->SubTotal();
 
 		$discount = $balance;
-		
+
 		//ensure discount never goes above Amount
-		$availableDiscount = $balance + $alreadyDiscounted;
-		if($availableDiscount > $subtotal){
-			$discount = $subtotal - $alreadyDiscounted;
+		if($discount > $subtotal){
+			$discount = $subtotal;
 		}
-		
+
 		$this->Amount = $discount;
 
 		return $this->Amount;
