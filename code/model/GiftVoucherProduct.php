@@ -70,10 +70,18 @@ class GiftVoucherProduct_Controller extends Product_Controller{
 		$form = parent::Form();
 		if($this->VariableAmount){
 			$form->setSaveableFields(array(
-				"UnitPrice"
+				"UnitPrice",
+				"Message",
+				"Delivery",
+				"RecipientEmail",
 			));
 			
-			$form->Fields()->push(
+			
+			$fields = $form->Fields(); 
+			
+			
+			//Amount
+			$fields->push(
 				$giftDropdown = new DropdownField(
 					"GiftCardAmountDropdown",
 					"Amount",
@@ -95,8 +103,8 @@ class GiftVoucherProduct_Controller extends Product_Controller{
 			$giftDropdown->setForm($form);
 			//Debug::dump($this->BasePrice);
 			//$giftDropdown->setEmptyString($this->BasePrice);
-			
-			$form->Fields()->push(
+
+			$fields->push(
 				$giftamount = new CurrencyField(
 					"UnitPrice",
 					"Enter Amount",
@@ -104,6 +112,39 @@ class GiftVoucherProduct_Controller extends Product_Controller{
 				)
 			); //TODO: set minimum amount
 			$giftamount->setForm($form);
+
+
+			//Message
+			$fields->push(
+				$m = new TextareaField(
+					'Message',
+					'Enter a message for the recipient'
+				)
+			);
+
+
+			//Delivery
+			$fields->push(
+				$d = new OptionsetField(
+					'Delivery',
+					'Delivery',
+					//singleton('GiftVoucher_OrderItem')->dbObject('Delivery')->enumValues()
+					array(
+						'Email' => 'Email',
+						'PrintAtHome' => 'Print at Home'
+					)
+				)
+			);
+			$d->setValue('Email');
+			
+			//Recipient email
+			$fields->push(
+				$r = new TextField(
+					'RecipientEmail',
+					'Recipient Email'
+				)
+			);
+			
 		}
 		$form->setValidator($validator = new GiftVoucherFormValidator(array(
 			"Quantity", "UnitPrice"	
@@ -139,7 +180,10 @@ class GiftVoucherFormValidator extends RequiredFields{
 class GiftVoucher_OrderItem extends Product_OrderItem{
 	
 	static $db = array(
-		"GiftedTo" => "Varchar"
+		"GiftedTo" => "Varchar",
+		"Delivery" => "Enum(array('Email', 'PrintAtHome', 'Email'))",
+		"RecipientEmail" => "Varchar",
+		"Message" => "Text"
 	);
 	
 	static $has_many = array(
