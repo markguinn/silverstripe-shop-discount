@@ -2,7 +2,7 @@
 	$(function () {
 		
 		//Amount Dropdown
-		$('#GiftCardAmountDropdown').change(function() {
+		$(document).on('change', '#GiftCardAmountDropdown', function() {
 			//per default make sure that unit price is hidden
 			$('#UnitPrice').hide();
 
@@ -27,7 +27,7 @@
 		});
 		
 		//Delivery method
-		$('div#Delivery input').change(function() {
+		$(document).on('change', 'div#Delivery input', function() {
 			var val = $(this).val();
 			if (val == 'PrintAtHome') {
 				$('div#RecipientEmail').hide();
@@ -35,5 +35,6 @@
 				$('div#RecipientEmail').show();
 			}
 		});
+		
 	});
 })(jQuery);
