@@ -1,9 +1,5 @@
 (function($) {
 	$(function () {
-
-		//hiding unit price on init - will only be shown whe "Enter amount" is chosen
-		$('#UnitPrice').hide();
-		
 		
 		$('#GiftCardAmountDropdown').change(function() {
 			//per default make sure that unit price is hidden

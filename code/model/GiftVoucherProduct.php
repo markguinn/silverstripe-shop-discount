@@ -60,6 +60,12 @@ class GiftVoucherProduct_Controller extends Product_Controller{
 	function Form(){
 		
 		Requirements::javascript('shop_discount/javascript/GiftVoucherProduct.js');
+		//hiding unit price on init - will only be shown whe "Enter amount" is chosen
+		Requirements::customCSS('
+			#UnitPrice {
+				display:none;
+			}
+		');
 		
 		$form = parent::Form();
 		if($this->VariableAmount){
