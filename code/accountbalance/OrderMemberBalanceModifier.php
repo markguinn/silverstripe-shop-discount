@@ -43,8 +43,8 @@ class OrderMemberBalanceModifier extends OrderModifier {
 	function value($incoming){
 
 		$balance = $this->accountBalanceAmount();
-		$order = $this->Order();
-		$subtotal = $order->SubTotal();
+//		$order = $this->Order();
+		$subtotal = $incoming; //$order->SubTotal();
 		
 		$discount = $balance;
 		

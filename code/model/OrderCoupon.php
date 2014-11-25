@@ -321,10 +321,17 @@ class OrderCoupon extends DataObject {
 	/**
 	 * Work out the discount for a given order.
 	 * @param Order $order
+	 * @param float $runningTotal [optional] (if called from OrderCouponModifier this allows them to pay shipping and tax as well)
 	 * @return double - discount amount
 	 */
-	function orderDiscount(Order $order){
+	function orderDiscount(Order $order, $runningTotal = 0){
 		$discount = 0;
+		if ($this->GiftVoucherID && $runningTotal) {
+			$discountvalue = $this->getDiscountValue($runningTotal);
+			$discount += ($discountvalue > $runningTotal) ? $runningTotal : $discountvalue; //prevent discount being greater than what is possible
+			return $discount;
+		}
+
 		if($this->ForItems){
 			$items = $order->Items();
 			$discountable = 0;
