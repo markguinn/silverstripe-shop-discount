@@ -247,13 +247,43 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 	 * Send the voucher to the appropriate email
 	 */
 	function sendVoucher(OrderCoupon $coupon){
+		
+		//fallback settings
 		$from = Email::getAdminEmail();
 		$to = $this->Order()->getLatestEmail();
-		$subject = _t("Order.GIFTVOUCHERSUBJECT", "Gift voucher");
+		$subject = "Gift Card";
+		
+		$m = $this->Order()->Member();
+
+
+		$delivery = $this->Delivery;
+		
+		if ($delivery == 'Email') {
+			$recipientEmail = $this->RecipientEmail;
+			if (Email::validEmailAddress($recipientEmail)) {
+
+				if ($m && $m->exists()) {
+					$subject = "Gift Card from {$m->getName()}";
+				}
+				$from = $this->Order()->getLatestEmail();
+				$to = $recipientEmail;
+			}
+		} else {
+			//TODO actually no emails should be sent here,
+			//and instead there should be an option to print a gift
+			//card from the receipt
+			//Until this has been developed, an email will be sent out
+			$subject = 'Print this gift card for handing out';
+		}
+		
+		
 		$email = new Email($from, $to, $subject);
 		$email->setTemplate("GiftVoucherEmail");
 		$email->populateTemplate(array(
-			'Coupon' => $coupon
+			'Coupon' => $coupon,
+			'Message'=> $this->Message,
+			'Sender' => $m,
+			'Delivery' => $delivery
 		));
 		return $email->send();
 	}
