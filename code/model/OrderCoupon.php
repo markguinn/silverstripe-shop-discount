@@ -488,7 +488,18 @@ class OrderCoupon extends DataObject {
 	 * @return string
 	 */
 	public function getGiftCardPrintLink() {
-		return "/giftcardprint/show/{$this->Code}";
+		$voucher = $this->GiftVoucher();
+		if ($voucher && $voucher->exists()) {
+			
+			$action = 'forceprint';
+			
+			if ($voucher->Delivery == 'Email') {
+				$action = 'show';
+			}
+			
+			return "/giftcardprint/$action/{$this->Code}";
+		} 
+		
 	}
 
 }

@@ -6,6 +6,12 @@
 			font-family: sans-serif;
 		}
 	</style>
+
+	<% if $ForcePrint %>
+		<script>
+			window.print();
+		</script>
+	<% end_if %>
 </head>
 <body>
 	$Layout

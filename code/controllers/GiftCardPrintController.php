@@ -2,9 +2,12 @@
 class GiftCardPrintController extends Controller {
 
 	private static $allowed_actions = array(
-		'show'
+		'show',
+		'forceprint'
 	);
 	
+	
+	private $forcePrint = false;
 	
 	public function show() {
 		$params = $this->getURLParams();
@@ -25,12 +28,18 @@ class GiftCardPrintController extends Controller {
 			$voucher->populateEmailTemplate($email, $coupon);
 			
 			return $this->customise(array(
-				'Layout' => $email->getParsedBody()
+				'Layout' => $email->getParsedBody(),
+				'ForcePrint' => $this->forcePrint
 			))->renderWith('GiftCardPrintController');
 			
 		} else {
 			return $this->preventSniffing();
 		}
+	}
+	
+	public function forceprint() {
+		$this->forcePrint = true;
+		return $this->show();
 	}
 
 
