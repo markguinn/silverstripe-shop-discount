@@ -262,6 +262,8 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 		$delivery = $this->Delivery;
 		
 		if ($delivery == 'Email') {
+			//Emailing the voucher directly to the final recipient
+			
 			$recipientEmail = $this->RecipientEmail;
 			if (Email::validEmailAddress($recipientEmail)) {
 
@@ -275,29 +277,20 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 				$this->populateEmailTemplate($email, $coupon);
 			}
 		} else {
-			//TODO actually no emails should be sent here,
-			//and instead there should be an option to print a gift
-			//card from the receipt
-			//Until this has been developed, an email will be sent out
-			$subject = 'Print this gift card for handing out';
+			//Sending a link with instructions on how to print a gift card
+			
+			$subject = 'Print your gift card';
 
 			$link = Director::protocolAndHost() . $coupon->getGiftCardPrintLink();
 			
 			$email = new Email($from, $to, $subject);
 			$email->setBody("
-				<a href=\"{$link}\">Click here for printing your gift card</a>
+				Thank you for purchasing a gift card. <br/>
+
+				<a href=\"{$link}\">Click here for printing it</a>
 			");
 			
 		}
-		
-		
-		
-
-
-
-		
-		
-		
 		
 		return $email->send();
 	}
