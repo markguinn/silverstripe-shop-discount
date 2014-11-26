@@ -483,4 +483,12 @@ class OrderCoupon extends DataObject {
 		return $this->messagetype;
 	}
 
+	/**
+	 * Getter for the print link for gift cards
+	 * @return string
+	 */
+	public function getGiftCardPrintLink() {
+		return "/giftcardprint/show/{$this->Code}";
+	}
+
 }

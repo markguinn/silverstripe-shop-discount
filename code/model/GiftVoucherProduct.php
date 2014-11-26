@@ -242,9 +242,12 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 		$this->Coupons()->add($coupon);
 		return $coupon;
 	}
-	
-	/*
-	 * Send the voucher to the appropriate email
+
+	/**
+	 * Sending the voucher
+	 * Depending on the delivery method it will be mailed directly to the
+	 * final recipient
+	 * Else, a link for print will be sent to the customer
 	 */
 	function sendVoucher(OrderCoupon $coupon){
 		
@@ -267,6 +270,9 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 				}
 				$from = $this->Order()->getLatestEmail();
 				$to = $recipientEmail;
+
+				$email = new Email($from, $to, $subject);
+				$this->populateEmailTemplate($email, $coupon);
 			}
 		} else {
 			//TODO actually no emails should be sent here,
@@ -274,18 +280,43 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 			//card from the receipt
 			//Until this has been developed, an email will be sent out
 			$subject = 'Print this gift card for handing out';
+
+			$link = Director::protocolAndHost() . $coupon->getGiftCardPrintLink();
+			
+			$email = new Email($from, $to, $subject);
+			$email->setBody("
+				<a href=\"{$link}\">Click here for printing your gift card</a>
+			");
+			
 		}
 		
 		
-		$email = new Email($from, $to, $subject);
+		
+
+
+
+		
+		
+		
+		
+		return $email->send();
+	}
+
+	/**
+	 * Populating the 
+	 * @param Email $email
+	 */
+	public function populateEmailTemplate($email, $coupon) {
+		
 		$email->setTemplate("GiftVoucherEmail");
 		$email->populateTemplate(array(
 			'Coupon' => $coupon,
 			'Message'=> $this->Message,
-			'Sender' => $m,
-			'Delivery' => $delivery
+			'Sender' => $this->Order()->Member(),
+			'Delivery' => $this->Delivery
 		));
-		return $email->send();
+		//return $email;
+
 	}
 	
 }
