@@ -270,6 +270,11 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 
 		$delivery = $this->Delivery;
 		
+		//Default email/fallback
+		$email = new Email($from, $to, $subject);
+		$this->populateEmailTemplate($email, $coupon);
+		
+		
 		if ($delivery == 'Email') {
 			//Emailing the voucher directly to the final recipient
 			
