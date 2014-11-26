@@ -10,6 +10,7 @@ class GiftVoucherProduct extends Product{
 	);
 
 	private static $email_subject = 'Gift Card from %s';
+	private static $print_email_subject = 'Print your gift card';
 
 	static $order_item = "GiftVoucher_OrderItem";
 	
@@ -295,17 +296,16 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 		} else {
 			//Sending a link with instructions on how to print a gift card
 			
-			$subject = 'Print your gift card';
+			$subject = self::config()->get('print_email_subject');
 
 			$link = Director::protocolAndHost() . $coupon->getGiftCardPrintLink();
 			
 			$email = new Email($from, $to, $subject);
-			$email->setBody("
-				Thank you for purchasing a gift card. <br/>
-
-				<a href=\"{$link}\">Click here for printing it</a>
-			");
-			
+			$email->setTemplate('GiftVoucherPrintEmail');
+			$email->populateTemplate(array(
+				'Link' => $link,
+				'Name' => $m && $m->exists() ? $m->getName() : '',
+			));
 		}
 		
 		return $email->send();
