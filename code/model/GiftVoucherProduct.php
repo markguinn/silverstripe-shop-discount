@@ -8,7 +8,9 @@ class GiftVoucherProduct extends Product{
 		"VariableAmount" => "Boolean",
 		"MinimumAmount" => "Currency"
 	);
-	
+
+	private static $email_subject = 'Gift Card from %s';
+
 	static $order_item = "GiftVoucher_OrderItem";
 	
 	public static $singular_name = "Gift Card";
@@ -263,7 +265,7 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 			if (Email::validEmailAddress($recipientEmail)) {
 
 				if ($m && $m->exists()) {
-					$subject = "Gift Card from {$m->getName()}";
+					$subject = sprintf(self::config()->get('email_subject'), $m->getName());
 				}
 				$from = $this->Order()->getLatestEmail();
 				$to = $recipientEmail;
