@@ -304,7 +304,7 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 		$email->setTemplate("GiftVoucherEmail");
 		$email->populateTemplate(array(
 			'Coupon' => $coupon,
-			'Message'=> $this->Message,
+			'Message'=> stripcslashes($this->obj('Message')->RAW()),
 			'Sender' => $this->Order()->Member(),
 			'Delivery' => $this->Delivery
 		));
