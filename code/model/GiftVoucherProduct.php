@@ -203,6 +203,15 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 		}
 		return parent::UnitPrice();
 	}
+
+	/**
+	 * Somehow the message is being escaped on save
+	 * - this getter removes those extra slashes
+	 * @return string
+	 */
+	public function getStrippedMessage() {
+		return stripcslashes($this->obj('Message')->RAW());
+	}
 	
 	/**
 	 * Create vouchers on order payment success event
@@ -304,7 +313,7 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 		$email->setTemplate("GiftVoucherEmail");
 		$email->populateTemplate(array(
 			'Coupon' => $coupon,
-			'Message'=> stripcslashes($this->obj('Message')->RAW()),
+			'Message'=> $this->getStrippedMessage(),
 			'Sender' => $this->Order()->Member(),
 			'Delivery' => $this->Delivery
 		));
