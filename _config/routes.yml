@@ -1,0 +1,7 @@
+---
+Name: shop-dicount-routes
+---
+Director:
+  rules:
+    'giftcardprint//$Action/$ID/$OtherID': 'GiftCardPrintController'
+

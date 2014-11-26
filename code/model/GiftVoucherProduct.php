@@ -205,6 +205,15 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 		}
 		return parent::UnitPrice();
 	}
+
+	/**
+	 * Somehow the message is being escaped on save
+	 * - this getter removes those extra slashes
+	 * @return string
+	 */
+	public function getStrippedMessage() {
+		return stripcslashes($this->obj('Message')->RAW());
+	}
 	
 	/**
 	 * Create vouchers on order payment success event
@@ -244,9 +253,12 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 		$this->Coupons()->add($coupon);
 		return $coupon;
 	}
-	
-	/*
-	 * Send the voucher to the appropriate email
+
+	/**
+	 * Sending the voucher
+	 * Depending on the delivery method it will be mailed directly to the
+	 * final recipient
+	 * Else, a link for print will be sent to the customer
 	 */
 	function sendVoucher(OrderCoupon $coupon){
 		
@@ -260,7 +272,14 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 
 		$delivery = $this->Delivery;
 		
+		//Default email/fallback
+		$email = new Email($from, $to, $subject);
+		$this->populateEmailTemplate($email, $coupon);
+		
+		
 		if ($delivery == 'Email') {
+			//Emailing the voucher directly to the final recipient
+			
 			$recipientEmail = $this->RecipientEmail;
 			if (Email::validEmailAddress($recipientEmail)) {
 
@@ -269,25 +288,44 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 				}
 				$from = $this->Order()->getLatestEmail();
 				$to = $recipientEmail;
+
+				$email = new Email($from, $to, $subject);
+				$this->populateEmailTemplate($email, $coupon);
 			}
 		} else {
-			//TODO actually no emails should be sent here,
-			//and instead there should be an option to print a gift
-			//card from the receipt
-			//Until this has been developed, an email will be sent out
-			$subject = 'Print this gift card for handing out';
+			//Sending a link with instructions on how to print a gift card
+			
+			$subject = 'Print your gift card';
+
+			$link = Director::protocolAndHost() . $coupon->getGiftCardPrintLink();
+			
+			$email = new Email($from, $to, $subject);
+			$email->setBody("
+				Thank you for purchasing a gift card. <br/>
+
+				<a href=\"{$link}\">Click here for printing it</a>
+			");
+			
 		}
 		
+		return $email->send();
+	}
+
+	/**
+	 * Populating the 
+	 * @param Email $email
+	 */
+	public function populateEmailTemplate($email, $coupon) {
 		
-		$email = new Email($from, $to, $subject);
 		$email->setTemplate("GiftVoucherEmail");
 		$email->populateTemplate(array(
 			'Coupon' => $coupon,
-			'Message'=> $this->Message,
-			'Sender' => $m,
-			'Delivery' => $delivery
+			'Message'=> $this->getStrippedMessage(),
+			'Sender' => $this->Order()->Member(),
+			'Delivery' => $this->Delivery
 		));
-		return $email->send();
+		//return $email;
+
 	}
 	
 }
