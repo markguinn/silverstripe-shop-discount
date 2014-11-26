@@ -49,8 +49,8 @@ class GiftCardPrintController extends Controller {
 	 * This renders it practically impossible to guess coupons
 	 */
 	private function preventSniffing() {
-		return 'wating...';
-		return $this->httpError(404, 'Not found');
+		sleep(15);
+		return $this->httpError(404);
 		
 	}
 }
