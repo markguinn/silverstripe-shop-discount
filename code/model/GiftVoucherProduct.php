@@ -285,7 +285,7 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 			if (Email::validEmailAddress($recipientEmail)) {
 
 				if ($m && $m->exists()) {
-					$subject = sprintf(self::config()->get('email_subject'), $m->getName());
+					$subject = sprintf(Config::inst()->get('GiftVoucherProduct', 'email_subject'), $m->getName());
 				}
 				$from = $this->Order()->getLatestEmail();
 				$to = $recipientEmail;
@@ -296,7 +296,7 @@ class GiftVoucher_OrderItem extends Product_OrderItem{
 		} else {
 			//Sending a link with instructions on how to print a gift card
 			
-			$subject = self::config()->get('print_email_subject');
+			$subject = Config::inst()->get('GiftVoucherProduct', 'print_email_subject');
 
 			$link = Director::protocolAndHost() . $coupon->getGiftCardPrintLink();
 			
