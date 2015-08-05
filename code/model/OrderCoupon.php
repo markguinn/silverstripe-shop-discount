@@ -20,6 +20,7 @@ class OrderCoupon extends DataObject {
 		//"Cumulative" => "Boolean",
 		"MinOrderValue" => "Currency",
 		"UseLimit" => "Int",
+		"MemberUseLimit" => "Int",
 		"StartDate" => "Datetime",
 		"EndDate" => "Datetime"
 	);
@@ -43,6 +44,7 @@ class OrderCoupon extends DataObject {
 		"Type" => "Percent",
 		"Active" => true,
 		"UseLimit" => 0,
+		"MemberUseLimit" => 0,
 		//"Cumulative" => 1,
 		"ForItems" => 1
 	);
@@ -136,7 +138,8 @@ class OrderCoupon extends DataObject {
 						new CouponDatetimeField("EndDate","End Date / Time (you should set the end time to 23:59:59, if you want to include the entire end day)")
 					),
 					new CurrencyField("MinOrderValue","Minimum order subtotal"),
-					new NumericField("UseLimit","Limit number of uses (0 = unlimited)")
+					new NumericField("UseLimit","Limit number of uses (0 = unlimited)"),
+					new CheckboxField("MemberUseLimit","Allow each account to use only once")
 				)
 			)
 		));
@@ -250,6 +253,10 @@ class OrderCoupon extends DataObject {
 		}
 		if($this->UseLimit > 0 && $this->getUseCount($order) >= $this->UseLimit) {
 			$this->error(_t("OrderCoupon.LIMITREACHED","Limit of $this->UseLimit uses for this code has been reached."));
+			return false;
+		}
+		if($this->MemberUseLimit > 0 && Member::currentUserID() && $this->getUseCount($order, Member::currentUserID()) >= $this->MemberUseLimit) {
+			$this->error("You have already used this coupon code.");
 			return false;
 		}
 		if($this->MinOrderValue > 0 && $order->SubTotal() < $this->MinOrderValue){
@@ -409,7 +416,7 @@ class OrderCoupon extends DataObject {
 	* @param string $order - ignore this order when counting uses
 	* @return int
 	*/
-	function getUseCount($order = null) {
+	function getUseCount($order = null, $memberID = 0) {
 //		$filter = "\"Order\".\"Paid\" IS NOT NULL";
 //		if($order){
 //			$filter .= " AND \"OrderAttribute\".\"OrderID\" != ".$order->ID;
@@ -430,10 +437,13 @@ class OrderCoupon extends DataObject {
 		//Additionally we're making sure that we're only counting order items
 		//That belong to this coupon
 		$filter .= " AND \"OrderCouponModifier\".\"CouponID\" =" . $this->ID;
-		
-		
-		if($order){
+
+		if ($order) {
 			$filter .= " AND \"OrderAttribute\".\"OrderID\" != ".$order->ID;
+		}
+
+		if ($memberID) {
+			$filter .= " AND \"Order\".\"MemberID\" = '{$memberID}'";
 		}
 
 		return OrderCouponModifier::get()
