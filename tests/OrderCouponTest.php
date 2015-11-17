@@ -14,7 +14,8 @@ class OrderCouponTest extends FunctionalTest{
 	
 	function setUp(){
 		parent::setUp();
-		ShopTest::setConfiguration();		
+		ShopTest::setConfiguration();
+		ShopMember::$login_joins_cart = false;
 		$this->placedorder = $this->objFromFixture("Order", "placed");
 		$this->cart = $this->objFromFixture("Order", "cart");
 		$this->othercart = $this->objFromFixture("Order", "othercart");
@@ -34,7 +35,35 @@ class OrderCouponTest extends FunctionalTest{
 		$this->assertEquals($coupon->orderDiscount($this->placedorder), 10, "$10 off order");
 		//TODO: test ammount that is greater than order value
 	}
-	
+
+	/**
+	 * NOTE: this test should never be pushed to the main shop repo. It is specific to Daywind.
+	 */
+	function testDaywindPercentDoesntFallBelowWholesale() {
+		$coupon = $this->objFromFixture('OrderCoupon', '40percentoff');
+		/** @var Product $tshirt */
+		$tshirt = $this->objFromFixture('Product', 'tshirt');
+		$tshirt->publish('Stage','Live');
+		/** @var Product $mp3player */
+		$mp3player = $this->objFromFixture('Product', 'mp3player');
+		$mp3player->WholesalePrice = 190;
+		$mp3player->write();
+		$mp3player->publish('Stage','Live');
+		ShoppingCart::singleton()->setCurrent(new Order());
+		ShoppingCart::singleton()->add($tshirt, 4);
+		ShoppingCart::singleton()->add($mp3player, 2);
+		$order = ShoppingCart::curr();
+
+		// mp3player = 200*2 = 400
+		// tshirt = 25*4 = 100
+		// 40% discount of $500 = $200
+		// 40% discount of tshirt = $40
+		// 40% discount of mp3player = $160
+		// max discount for mp3player = $20 (because of wholesale price)
+		// max discount total = $60
+		$this->assertEquals(60, $coupon->orderDiscount($order), "max discount is applied");
+	}
+
 	function testProductsDiscount(){
 		$coupon = $this->objFromFixture("OrderCoupon","products20percentoff");
 		$coupon->Products()->add($this->objFromFixture("Product", "tshirt")); //add product to coupon product list
@@ -53,7 +82,18 @@ class OrderCouponTest extends FunctionalTest{
 		$this->assertFalse($coupon->valid($this->othercart),"Order does not contain clothing");
 		$this->assertEquals($coupon->orderDiscount($this->othercart), 0, "No discount, because no product in category");
 	}
-	
+
+	function testManyManyCategoryDiscount(){
+		$clothing = $this->objFromFixture("ProductCategory", "clothing");
+		$coupon = $this->objFromFixture("OrderCoupon","clothing5percent");
+		$coupon->Categories()->add($clothing);
+		$mp3player = $this->objFromFixture("Product", "mp3player");
+		$mp3player->ProductCategories()->add($clothing);
+		$mp3player->publish('Stage','Live');
+		$this->assertTrue($coupon->valid($this->othercart),"Order DOES contain clothing via the many-many relation");
+		$this->assertEquals($coupon->orderDiscount($this->othercart), 10, "5% because of many-many category");
+	}
+
 	function testZoneDiscount(){
 		$coupon = $this->objFromFixture('OrderCoupon', 'zoned');
 		//add zones to coupon

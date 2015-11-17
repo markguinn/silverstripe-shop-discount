@@ -342,13 +342,25 @@ class OrderCoupon extends DataObject {
 		if($this->ForItems){
 			$items = $order->Items();
 			$discountable = 0;
+			$discountvalue = 0;
+			$itemLevelDiscount = ($this->Percent > 0);
 			foreach($items as $item){
 				if($this->itemMatchesCriteria($item)){
-					$discountable += $item->Total();
+					$discountable += ($itemTotal = $item->Total());
+					if ($itemLevelDiscount) {
+						$buyable = $item instanceof ProductVariation_OrderItem ? $item->ProductVariation(true) : $item->Product(true);
+						// If we can find the wholesale price, use that as a minimum, otherwise assume it's 40%
+						$minPrice = ($buyable && $buyable->exists() && $buyable->WholesalePrice > 0)
+								? $buyable->WholesalePrice * $item->Quantity
+								: $itemTotal * 0.60;
+						$discountvalue += min($this->getDiscountValue($itemTotal), $itemTotal - $minPrice);
+					}
 				}
 			}
 			if($discountable){
-				$discountvalue = $this->getDiscountValue($discountable); 
+				// if we're not using percentages, calculate the discount here
+				if (!$itemLevelDiscount) $discountvalue = $this->getDiscountValue($discountable);
+				// add to the total discount
 				$discount += ($discountvalue > $discountable) ? $discountable : $discountvalue; //prevent discount being greater than what is possible
 			}
 		}
@@ -376,12 +388,14 @@ class OrderCoupon extends DataObject {
 				return false;
 			}
 		}
-		$categories = $this->Categories();
-		if($categories->exists()){
+		$categories = $this->Categories()->getIDList();
+		if(!empty($categories)){
 			$itemproduct = $item->Product(true); //true forces the current version of product to be retrieved.
-			if(!$itemproduct || !$categories->find('ID', $itemproduct->ParentID)){
-				return false;
-			}
+			if (!$itemproduct) return false;
+			$productCats = $itemproduct->ProductCategories()->getIDList();
+			$productCats[$itemproduct->ParentID] = $itemproduct->ParentID;
+			$overlap = array_intersect_key($categories, $productCats);
+			if (empty($overlap)) return false;
 		}
 		$match = true;
 		$this->extend("updateItemCriteria",$item, $match);

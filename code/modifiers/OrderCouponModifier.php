@@ -73,7 +73,7 @@ class OrderCouponModifier extends OrderModifier {
 			
 			return $title;
 		}
-		return _t("OrderCouponModifier.NOCOUPONENTERED", "No Coupon Entered").$code;
+		return _t("OrderCouponModifier.NOCOUPONENTERED", "No Coupon Entered");
 	}
 	
 	/**
