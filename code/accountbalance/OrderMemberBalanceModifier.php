@@ -78,9 +78,11 @@ class OrderMemberBalanceModifier extends OrderModifier {
 	
 	private function accountBalanceAmount() {
 		$m = Member::currentUser();
-		$balance = $m->getAccountBalanceAmount();
-	
-		return $balance;
+		if ($m && $balance = $m->getAccountBalanceAmount()) {
+			return $balance;
+		} else {
+			return 0;
+		}
 	}
 
 }
